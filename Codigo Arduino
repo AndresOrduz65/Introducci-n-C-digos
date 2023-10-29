@@ -1,0 +1,70 @@
+// Importa las librerías necesarias
+#include <Wire.h>
+#include <DHT.h>
+#include <LiquidCrystal_I2C.h>
+
+// Define los pines de conexión del sensor DHT11
+#define DHTPIN 2
+#define DHTTYPE DHT11
+
+// Declara el objeto del sensor DHT11
+DHT dht(DHTPIN, DHTTYPE);
+
+// Define la dirección I2C de la pantalla LCD
+#define I2C_ADDR 0x27
+
+// Declara el objeto de la pantalla LCD
+LiquidCrystal_I2C lcd(I2C_ADDR, 2, 1);
+
+// Función que se ejecuta una vez al iniciar el programa
+void setup() {
+  // Inicializa la comunicación serial
+  Serial.begin(9600);
+
+  // Inicializa la comunicación I2C con la pantalla LCD
+  Wire.begin();
+
+  // Inicializa el sensor DHT11
+  dht.begin();
+
+  // Limpia la pantalla LCD
+  lcd.clear();
+
+  // Imprime un mensaje de bienvenida
+  lcd.print("Temperatura y humedad");
+  lcd.setCursor(0, 1);
+  lcd.print("con sensor DHT11");
+
+  // Establece el brillo al máximo
+  lcd.backlight();
+
+  // Aumenta el contraste
+  lcd.setContrast(10);
+}
+
+// Función que se ejecuta de forma repetitiva
+void loop() {
+  // Lee los valores del sensor DHT11
+  float temperatura = dht.readTemperature();
+  float humedad = dht.readHumidity();
+
+  // Verifica si los valores se han leído correctamente
+  if (isnan(temperatura) || isnan(humedad)) {
+    // Imprime un mensaje de error
+    Serial.println("Error al leer los valores del sensor");
+  } else {
+    // Imprime los valores del sensor en la pantalla LCD
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("Temperatura: ");
+    lcd.print(temperatura);
+    lcd.print(" °C");
+    lcd.setCursor(0, 1);
+    lcd.print("Humedad: ");
+    lcd.print(humedad);
+    lcd.print(" %");
+  }
+
+  // Espera 1 segundo
+  delay(1000);
+}
