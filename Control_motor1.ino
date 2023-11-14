@@ -7,7 +7,8 @@
 #define DHTPIN1 2 // Pin 2 del primer sensor
 #define DHTPIN2 3 // Pin 3 del segundo sensor
 #define HUMEDAD_MIN 50
-#define RELAY_PIN 12 // Pin del relé
+#define RELAY_PIN 4 //Pin del Led
+#define RELAY_PIN1 5 // Pin del Led1
 DHT dht1(DHTPIN1, DHTTYPE); // Objeto para el primer sensor
 DHT dht2(DHTPIN2, DHTTYPE); // Objeto para el segundo sensor
 
@@ -20,6 +21,7 @@ void setup() {
   pinMode(SENSOR1_PIN, INPUT);
   pinMode(SENSOR2_PIN, INPUT);
   pinMode(RELAY_PIN, OUTPUT); // Configura el pin del relé como salida
+  pinMode(RELAY_PIN1, OUTPUT);
 
   dht1.begin(); // Inicializa el primer sensor
   dht2.begin(); // Inicializa el segundo sensor
@@ -28,11 +30,12 @@ void setup() {
   lcd.begin(16, 2);
   lcd.clear();
   lcd.backlight();   
-
 }
+
 void encender_motor(){
+  digitalWrite(RELAY_PIN1, LOW);
   digitalWrite(RELAY_PIN, HIGH);  // Activa el relé y enciende el motor
-  delay(2000);                      // Espera dos segundos
+  delay(1000);                      // Espera dos segundos
   digitalWrite(RELAY_PIN, LOW);  // Desactiva el relé y apaga el motor
 }
 
@@ -62,6 +65,8 @@ void loop() {
     encender_motor(); // Llama a la función que enciende el motor
     } 
   else if (H>HUMEDAD_MIN){
-    digitalWrite(RELAY_PIN, LOW); // Desactiva el relé
+    
+    digitalWrite(RELAY_PIN1, HIGH); 
+
   }
 }
