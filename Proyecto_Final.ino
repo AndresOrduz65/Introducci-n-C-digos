@@ -97,32 +97,33 @@ void mostrarDatos(int humedad, float temperatura) {
   lcd.print(" 'C");
 }
 
-void controlarMotor(int humedad) {
+void controlarMotor1(int humedad) {
 
   if (humedad < HUMEDAD_MIN) {
 
-    digitalWrite(LED_ROJO, HIGH);
-
-    digitalWrite(MOTOR_PIN, HIGH);
+    digitalWrite(MOTOR1_PIN, HIGH);
 
     delay(10000);
 
     digitalWrite(MOTOR_PIN, LOW);
 
-    digitalWrite(LED_ROJO, LOW);
   }
 }
 
-void controlarLEDs(int humedad) {
+void controlarLEDs1(int humedad) {
 
   if (humedad > HUMEDAD_MIN) {
 
-    digitalWrite(LED_VERDE, HIGH);
+    digitalWrite(LED_VERDE1, HIGH);
   }
 
-  else {
+  else if(humedad < HUMEDAD_MIN){
 
-    digitalWrite(LED_VERDE, LOW);
+    digitalWrite(LED_ROJO1, HIGH);
+    digitalWrite(LED_VERDE1, LOW);
+  }
+  else {
+    
   }
 }
 
@@ -142,71 +143,71 @@ float medirDistancia() {
   return distancia;
 }
 
-// Función para mostrar la distancia en el monitor serie
-void mostrarDistancia() {
-  // Imprimir la distancia en el monitor serie
-  Serial.print("Distancia: ");
-  Serial.print(distancia);
-  Serial.println(" cm");
-}
-
 // Función para controlar el motor según la distancia
 void controlarMotor() {
   // Si la distancia es menor que la mínima, encender el motor
-  if (distancia < DISTANCIA_MIN) {
+  if (distancia >= DISTANCIA_MIN) {
     digitalWrite(MOTOR_PIN, HIGH);
   }
   // Si no, apagar el motor
-  else {
+  else if(distancia < DISTANCIA_MAX){
     digitalWrite(MOTOR_PIN, LOW);
+  }
+  else {
+
   }
 }
 
 // Función para controlar los LEDs según la distancia
 void controlarLEDs() {
   // Si la distancia es menor que la máxima, apagar el LED verde y encender el LED rojo
-  if (distancia < DISTANCIA_MAX) {
-    digitalWrite(LED_VERDE, LOW);
-    digitalWrite(LED_ROJO, HIGH);
+  if (distancia <= DISTANCIA_MAX) {
+    digitalWrite(LED_VERDE, HIGH);
+    digitalWrite(LED_ROJO, LOW);
     digitalWrite(LED_NARANJA, LOW);
   }
   // Si la distancia está entre la mínima y la máxima, apagar el LED rojo y encender el LED naranja
-  else if (distancia < DISTANCIA_MIN) {
-    digitalWrite(LED_ROJO, LOW);
+  else if (distancia >= DISTANCIA_MIN) {
+    digitalWrite(LED_ROJO, HIGH);
+    digitalWrite(LED_NARANJA, LOW);
+    digitalWrite(LED_VERDE, LOW);
+  }  
+  // Si la distancia es mayor que la mínima, apagar el LED naranja y encender el LED verde
+  else if(DISTANCIA_MAX < distancia && distancia < DISTANCIA_MIN){
     digitalWrite(LED_NARANJA, HIGH);
     digitalWrite(LED_VERDE, LOW);
-  }
-  // Si la distancia es mayor que la mínima, apagar el LED naranja y encender el LED verde
-  else {
-    digitalWrite(LED_NARANJA, LOW);
-    digitalWrite(LED_VERDE, HIGH);
     digitalWrite(LED_ROJO, LOW);
   }
 }
 
 
 void system1(){
-    int humedad = medirHumedad();
+  int humedad = medirHumedad();
 
   float temperatura = medirTemperatura();
 
   mostrarDatos(humedad, temperatura);
 
-  controlarMotor(humedad);
-  controlarLEDs(humedad);
+  controlarMotor1(humedad);
+  controlarLEDs1(humedad);
+
+  distancia = medirDistancia(); // Medir la distancia con el sensor
+  controlarLEDs(); // Controlar los LEDs según la distancia
 
   delay(1000);
 }
 
 void System2(){
-  distancia = medirDistancia(); // Medir la distancia con el sensor
-  mostrarDistancia(); // Mostrar la distancia en el monitor serie
+  
+  distancia = medirDistancia();
   controlarMotor(); // Controlar el motor según la distancia
-  controlarLEDs(); // Controlar los LEDs según la distancia
-  delay(1000); // Esperar un segundo antes de repetir el ciclo
+
+  delay(500); // Esperar un segundo antes de repetir el ciclo
 }
 
 void loop() {
+  
+  system1();
   // Leer el valor del pin del pulsador
   boolean boton = digitalRead(BOTON_PIN);
   // Si el pulsador está presionado
@@ -215,13 +216,14 @@ void loop() {
     estado = !estado;
     // Esperar un tiempo para evitar rebotes
     delay(100);
+    Serial.print(estado);
   }
 
   if (estado==1){
-    void system1();
-  }
-  else if(estado==0){
     void system2();
+  }
+  else{
+
   }
 }
 
